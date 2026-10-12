@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<meta name="theme-color" content="#0071e3">
+<style>
+  :root {
+    --bg: #f5f5f7;
+    --card: #ffffff;
+    --text: #1d1d1f;
+    --text-dim: #6e6e73;
+    --border: #d2d2d7;
+    --input-bg: #ffffff;
+    --progress-bg: #e5e5ea;
+    --btn-secondary: #e5e5ea;
+    --btn-secondary-hover: #d1d1d6;
+    --shadow: 0 2px 8px rgba(0,0,0,.06);
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --danger: #ff3b30;
+    --success: #34c759;
+  }
+  [data-theme="dark"] {
+    --bg: #1c1c1e;
+    --card: #2c2c2e;
+    --text: #f5f5f7;
+    --text-dim: #98989d;
+    --border: #3a3a3c;
+    --input-bg: #3a3a3c;
+    --progress-bg: #3a3a3c;
+    --btn-secondary: #3a3a3c;
+    --btn-secondary-hover: #48484a;
+    --shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    min-height: 100vh;
+    transition: background .25s, color .25s;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .topbar-right { display: flex; gap: 8px; flex-wrap: wrap; }
+  h1 { font-size: 28px; }
+  h2 { font-size: 19px; margin: 24px 0 12px; }
+  h3 { font-size: 15px; margin-bottom: 8px; color: var(--text-dim); font-weight: 600; }
+
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: .15s;
+  }
+  .btn:hover { background: var(--accent-hover); }
+  .btn.secondary {
+    background: var(--btn-secondary);
+    color: var(--text);
+  }
+  .btn.secondary:hover { background: var(--btn-secondary-hover); }
+  .btn.danger { background: var(--danger); }
+  .btn.small { padding: 5px 10px; font-size: 13px; }
+  .btn.icon {
+    padding: 8px 12px;
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  input, select {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    width: 100%;
+    background: var(--input-bg);
+    color: var(--text);
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  input[type="color"] { padding: 2px; height: 38px; cursor: pointer; }
+
+  form.add-form {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
+    gap: 10px;
+    align-items: end;
+    background: var(--card);
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    transition: background .25s;
+  }
+  form.add-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    color: var(--text-dim);
+    gap: 4px;
+  }
+
+  .quick-add {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    transition: background .25s;
+  }
+  .quick-add-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .quick-add-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  .quick-add label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    color: var(--text-dim);
+    gap: 4px;
+  }
+  .quick-add-feedback {
+    font-size: 12px;
+    color: var(--success);
+    margin-top: 8px;
+    min-height: 16px;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .quick-add-feedback.show { opacity: 1; }
+
+  /* ---------- Список книг ---------- */
+  #books {
+    margin-top: 24px;
+  }
+
+  .book {
+    border-left: 6px solid #ccc;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    transition: background .25s;
+  }
+  .book-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .book-title { font-size: 17px; font-weight: 600; }
+  .book-meta { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+  .book-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* ---------- Форма редактирования книги ---------- */
+  .book-edit-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 10px;
+    align-items: end;
+    margin-top: 8px;
+  }
+  .book-edit-grid label {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    color: var(--text-dim);
+    gap: 4px;
+  }
+  .book-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .progress-wrap {
+    margin-top: 12px;
+    background: var(--progress-bg);
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width .4s ease;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-top: 6px;
+    color: var(--text-dim);
+  }
+
+  .add-pages {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .add-pages input { max-width: 110px; }
+
+  /* ---------- Журнал ---------- */
+  .log {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--text-dim);
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 6px;
+    border-radius: 6px;
+    gap: 8px;
+    transition: background .15s;
+  }
+  .log-item:hover { background: var(--bg); }
+  .log-item.editing {
+    background: var(--bg);
+    padding: 8px;
+  }
+  .log-date { min-width: 96px; color: var(--text-dim); }
+  .log-pages { flex: 1; }
+  .log-actions {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .log-item:hover .log-actions { opacity: 1; }
+  .log-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 3px 7px;
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1;
+    transition: .15s;
+  }
+  .log-btn:hover { background: var(--btn-secondary); color: var(--text); }
+  .log-btn.danger:hover { background: var(--danger); color: #fff; }
+  .log-edit-form {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
+  }
+  .log-edit-form input {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  .log-edit-form input[type="date"] { max-width: 140px; }
+  .log-edit-form input[type="number"] { max-width: 80px; }
+  .log-edit-form .btn {
+    padding: 5px 10px;
+    font-size: 13px;
+    min-width: 34px;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat-value { font-weight: 600; font-size: 15px; }
+  .stat-label { color: var(--text-dim); font-size: 11px; text-transform: uppercase; letter-spacing: .3px; }
+
+  /* ---------- График (одиночный) ---------- */
+  .chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 100px;
+    margin-top: 8px;
+    padding: 8px 4px 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .chart-bar-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 18px;
+    flex: 1;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+  }
+  .chart-bar {
+    width: 100%;
+    min-height: 2px;
+    border-radius: 3px 3px 0 0;
+    transition: height .3s ease;
+    cursor: pointer;
+  }
+  .chart-bar-wrap:hover .chart-bar { opacity: .8; }
+  .chart-bar-wrap:hover .chart-tooltip { display: block; }
+  .chart-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .chart-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--card);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    white-space: nowrap;
+    z-index: 10;
+    margin-bottom: 4px;
+  }
+
+  /* ---------- Стеклянный график (несколько книг) ---------- */
+  .chart-bar-stack {
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    border-radius: 3px 3px 0 0;
+    overflow: hidden;
+    min-height: 2px;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .chart-bar-stack > div {
+    width: 100%;
+    min-height: 1px;
+  }
+  .chart-bar-wrap:hover .chart-bar-stack { opacity: .85; }
+  .chart-bar-wrap:hover .chart-tooltip { display: block; }
+
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .legend-color {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ---------- Heatmap ---------- */
+  .heatmap-wrap {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    transition: background .25s;
+  }
+  .heatmap-inner { display: inline-block; min-width: min-content; }
+  .hm-months {
+    display: flex;
+    gap: 3px;
+    margin-left: 32px;
+    margin-bottom: 4px;
+    font-size: 10px;
+    color: var(--text-dim);
+    height: 14px;
+  }
+  .hm-month { width: 13px; flex-shrink: 0; overflow: visible; white-space: nowrap; }
+  .hm-body { display: flex; gap: 4px; }
+  .hm-weekdays {
+    display: grid;
+    grid-template-rows: repeat(7, 13px);
+    gap: 3px;
+    font-size: 9px;
+    color: var(--text-dim);
+    width: 28px;
+    text-align: right;
+  }
+  .hm-weekdays > div { line-height: 13px; padding-right: 2px; }
+  .hm-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 13px);
+    grid-auto-flow: column;
+    grid-auto-columns: 13px;
+    gap: 3px;
+  }
+  .hm-cell {
+    width: 13px;
+    height: 13px;
+    border-radius: 3px;
+    background: var(--progress-bg);
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  .hm-cell:hover { transform: scale(1.35); }
+  .hm-cell.hm-empty-slot { background: transparent; cursor: default; }
+  .hm-cell.hm-empty-slot:hover { transform: none; }
+  .hm-l1 { background: color-mix(in srgb, var(--hm-color) 25%, var(--progress-bg)); }
+  .hm-l2 { background: color-mix(in srgb, var(--hm-color) 50%, var(--progress-bg)); }
+  .hm-l3 { background: color-mix(in srgb, var(--hm-color) 75%, var(--progress-bg)); }
+  .hm-l4 { background: var(--hm-color); }
+  .hm-today { outline: 1.5px solid var(--text); outline-offset: 1px; }
+  .hm-legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    margin-left: 32px;
+  }
+  .hm-legend .hm-cell { cursor: default; }
+  .hm-legend .hm-cell:hover { transform: none; }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .summary-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    transition: background .25s;
+  }
+  .summary-card .stat-value { font-size: 22px; }
+  .summary-card .stat-label { margin-top: 2px; }
+
+  .empty {
+    text-align: center;
+    color: var(--text-dim);
+    padding: 40px 20px;
+    font-size: 15px;
+  }
+
+  .finished-badge {
+    display: inline-block;
+    background: var(--success);
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .collapsible { display: none; margin-top: 12px; }
+  .collapsible.open { display: block; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: var(--card);
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    opacity: 0;
+    transition: all .3s;
+    z-index: 1000;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.error { background: var(--danger); color: #fff; }
+  .toast.success { background: var(--success); color: #fff; }
+
+  @media (max-width: 640px) {
+    form.add-form { grid-template-columns: 1fr 1fr; }
+    form.add-form label:first-child { grid-column: 1 / -1; }
+    form.add-form button { grid-column: span 1; }
+    .quick-add-row { grid-template-columns: 1fr 1fr; }
+    .quick-add-row label:first-child { grid-column: 1 / -1; }
+    .quick-add-row button { grid-column: 1 / -1; }
+    .book-edit-grid { grid-template-columns: 1fr 1fr; }
+    .book-edit-grid label:first-child { grid-column: 1 / -1; }
+    .log-actions { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="topbar">
+    <h1>📚 Трекер книг</h1>
+    <div class="topbar-right">
+      <button class="btn secondary" id="exportBtn" title="Скачать JSON со всеми книгами">⬇ Экспорт</button>
+      <button class="btn secondary" id="importBtn" title="Загрузить JSON из файла">⬆ Импорт</button>
+      <button class="btn secondary icon" id="themeToggle" title="Переключить тему">🌙</button>
+    </div>
+  </div>
+
+  <div id="quickAdd"></div>
+
+  <form class="add-form" id="addForm">
+    <label>Название
+      <input type="text" id="title" required placeholder="Название книги">
+    </label>
+    <label>Всего страниц
+      <input type="number" id="totalPages" min="1" required placeholder="300">
+    </label>
+    <label>Дата начала
+      <input type="date" id="startDate" required>
+    </label>
+    <label>Цвет
+      <input type="color" id="color" value="#0071e3">
+    </label>
+    <button type="submit" class="btn">Добавить</button>
+    <button type="button" class="btn secondary" id="clearAll">Очистить</button>
+  </form>
+
+  <div id="summary"></div>
+  <div id="heatmap"></div>
+  <div id="globalChart"></div>
+  <div id="books"></div>
+  
+</div>
+
+<input type="file" id="fileInput" accept="application/json,.json" style="display:none">
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'books-tracker-v1';
+const THEME_KEY = 'books-tracker-theme';
+const MONTHS_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const MONTHS_FULL  = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+
+// Цвет для heatmap и по умолчанию — не привязан к книге
+const DEFAULT_HEATMAP_COLOR = '#0071e3';
+
+let books = load();
+let openLogs = new Set();
+let openStats = new Set();
+let heatmapMode = 'all';
+let quickAddBookId = null;
+let editingLogId = null;
+let editingBookId = null;
+
+function uid() {
+  return crypto.randomUUID
+    ? crypto.randomUUID()
+    : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+}
+
+function load() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+  catch { return []; }
+  data.forEach(b => {
+    if (!Array.isArray(b.log)) b.log = [];
+    b.log.forEach(l => { if (!l.id) l.id = uid(); });
+  });
+  return data;
+}
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
+}
+
+/* ---------- Тост ---------- */
+let toastTimer = null;
+function showToast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+/* ---------- Тема ---------- */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved) { applyTheme(saved); return; }
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  applyTheme(prefersDark ? 'dark' : 'light');
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  applyTheme(next);
+  localStorage.setItem(THEME_KEY, next);
+  renderAll();
+});
+
+/* ---------- Утилиты ---------- */
+function today() { return new Date().toISOString().slice(0, 10); }
+function formatDate(iso) {
+  if (!iso) return '—';
+  const [y,m,d] = iso.split('-');
+  return `${d}.${m}.${y}`;
+}
+function daysBetween(a, b) {
+  return Math.round((new Date(b) - new Date(a)) / 86400000);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function pad2(n) { return String(n).padStart(2, '0'); }
+function isoDate(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+
+/* ---------- Пересчёт книги ---------- */
+function recalcBook(book) {
+  book.read = (book.log || []).reduce((s, l) => s + (l.pages || 0), 0);
+  if (book.read >= book.totalPages && (book.log || []).length > 0) {
+    const sorted = [...book.log].sort((a, b) => a.date.localeCompare(b.date));
+    book.endDate = sorted[sorted.length - 1].date;
+  } else {
+    book.endDate = null;
+  }
+}
+
+/* ---------- Экспорт / Импорт ---------- */
+document.getElementById('exportBtn').addEventListener('click', () => {
+  if (books.length === 0) {
+    showToast('Нет данных для экспорта', 'error');
+    return;
+  }
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    books: books
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = isoDate(new Date());
+  a.href = url;
+  a.download = `books-tracker-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`Экспортировано книг: ${books.length}`, 'success');
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  document.getElementById('fileInput').click();
+});
+
+document.getElementById('fileInput').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      const imported = Array.isArray(data) ? data : (data.books || []);
+      if (!Array.isArray(imported)) throw new Error('Неверный формат');
+      const valid = imported.filter(validateBook);
+      if (valid.length === 0) {
+        showToast('В файле нет корректных книг', 'error');
+        return;
+      }
+      valid.forEach(b => {
+        if (!Array.isArray(b.log)) b.log = [];
+        b.log.forEach(l => { if (!l.id) l.id = uid(); });
+      });
+      askImportMode(valid, imported.length - valid.length);
+    } catch (err) {
+      showToast('Не удалось прочитать файл: ' + err.message, 'error');
+    }
+  };
+  reader.onerror = () => showToast('Ошибка чтения файла', 'error');
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+function validateBook(b) {
+  return b && typeof b === 'object'
+      && typeof b.title === 'string'
+      && typeof b.totalPages === 'number' && b.totalPages > 0;
+}
+
+function askImportMode(imported, skippedCount) {
+  const skippedMsg = skippedCount > 0 ? `\nПропущено некорректных записей: ${skippedCount}` : '';
+  const replace = confirm(
+    `Найдено книг: ${imported.length}.${skippedMsg}\n\n` +
+    `ОК — ЗАМЕНИТЬ всё текущее содержимое.\n` +
+    `Отмена — ДОБАВИТЬ к существующим книгам (${books.length} шт.).`
+  );
+
+  let result;
+  if (replace) {
+    books = imported;
+    result = `Импортировано (замена): ${imported.length}`;
+  } else {
+    imported.forEach(b => {
+      b.id = uid();
+      books.push(b);
+    });
+    result = `Добавлено книг: ${imported.length}`;
+  }
+
+  openLogs.clear();
+  openStats.clear();
+  heatmapMode = 'all';
+  quickAddBookId = books[0] ? books[0].id : null;
+  editingLogId = null;
+  editingBookId = null;
+
+  save();
+  renderAll();
+  showToast(result, 'success');
+}
+
+/* ---------- Статистика книги ---------- */
+function bookStats(book) {
+  const logs = book.log || [];
+  const read = book.read || 0;
+  const percent = Math.min(100, Math.round(read / book.totalPages * 100));
+
+  const byDay = {};
+  logs.forEach(l => { byDay[l.date] = (byDay[l.date] || 0) + l.pages; });
+
+  const dates = Object.keys(byDay).sort();
+  const startDate = book.startDate;
+  const lastDate = dates.length ? dates[dates.length - 1] : startDate;
+  const daysPassed = Math.max(1, daysBetween(startDate, lastDate) + 1);
+
+  const daysRead = dates.length;
+  const avgPerReadingDay = daysRead ? (read / daysRead) : 0;
+  const avgPerCalendarDay = read / daysPassed;
+
+  const remaining = Math.max(0, book.totalPages - read);
+  let forecastDate = null;
+  if (remaining > 0 && avgPerCalendarDay > 0) {
+    const daysLeft = Math.ceil(remaining / avgPerCalendarDay);
+    const d = new Date(lastDate);
+    d.setDate(d.getDate() + daysLeft);
+    forecastDate = isoDate(d);
+  }
+
+  let bestDay = null, bestPages = 0;
+  for (const d of dates) {
+    if (byDay[d] > bestPages) { bestPages = byDay[d]; bestDay = d; }
+  }
+
+  return { byDay, dates, daysRead, avgPerReadingDay, avgPerCalendarDay,
+           remaining, forecastDate, bestDay, bestPages, percent, read };
+}
+
+/* ---------- Одиночный график ---------- */
+function buildChart(byDay, color, daysBack = 30) {
+  const dates = [];
+  const start = new Date();
+  start.setHours(0,0,0,0);
+  start.setDate(start.getDate() - (daysBack - 1));
+  for (let i = 0; i < daysBack; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    dates.push(isoDate(d));
+  }
+
+  const maxVal = Math.max(1, ...dates.map(d => byDay[d] || 0));
+  const bars = dates.map(d => {
+    const val = byDay[d] || 0;
+    const h = val > 0 ? Math.max(2, (val / maxVal) * 100) : 0;
+    const [y,m,dd] = d.split('-');
+    const tip = `${dd}.${m}.${y}: ${val} стр.`;
+    return `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height:${h}%; background:${color}"></div>
+        <div class="chart-tooltip">${tip}</div>
+        <div class="chart-label">${dd}</div>
+      </div>`;
+  }).join('');
+
+  return `<div class="chart">${bars}</div>`;
+}
+
+/* ---------- Стеклянный график по всем книгам ---------- */
+function buildStackedChart(books, daysBack = 30) {
+  // date → { bookId: pages }
+  const byDay = {};
+  books.forEach(b => {
+    (b.log || []).forEach(l => {
+      if (!byDay[l.date]) byDay[l.date] = {};
+      byDay[l.date][b.id] = (byDay[l.date][b.id] || 0) + l.pages;
+    });
+  });
+
+  const dates = [];
+  const start = new Date();
+  start.setHours(0,0,0,0);
+  start.setDate(start.getDate() - (daysBack - 1));
+  for (let i = 0; i < daysBack; i++) {
+    const d = new Date(start);
+    d.setDate(d.getDate() + i);
+    dates.push(isoDate(d));
+  }
+
+  let maxVal = 1;
+  dates.forEach(d => {
+    const day = byDay[d] || {};
+    const sum = Object.values(day).reduce((a, b) => a + b, 0);
+    if (sum > maxVal) maxVal = sum;
+  });
+
+  // Фиксированный порядок книг — как в books
+  const order = books.map(b => b.id);
+
+  const bars = dates.map(dateStr => {
+    const day = byDay[dateStr] || {};
+    const sum = Object.values(day).reduce((a, b) => a + b, 0);
+    const totalH = sum > 0 ? Math.max(2, (sum / maxVal) * 100) : 0;
+    const [y,m,dd] = dateStr.split('-');
+
+    let segments = '';
+    if (sum > 0) {
+      order.forEach(bid => {
+        const pages = day[bid] || 0;
+        if (pages > 0) {
+          const book = books.find(b => b.id === bid);
+          const flex = pages / sum;
+          segments += `<div style="background:${book.color}; flex:${flex};"></div>`;
+        }
+      });
+    }
+
+    const tip = `${dd}.${m}.${y}: ${sum} стр.`;
+    return `
+      <div class="chart-bar-wrap">
+        ${sum > 0
+          ? `<div class="chart-bar-stack" style="height:${totalH}%">${segments}</div>`
+          : `<div class="chart-bar" style="height:0;background:transparent"></div>`}
+        <div class="chart-tooltip">${tip}</div>
+        <div class="chart-label">${dd}</div>
+      </div>`;
+  }).join('');
+
+  const legend = books.map(b => `
+    <div class="legend-item">
+      <span class="legend-color" style="background:${b.color}"></span>
+      <span>${escapeHtml(b.title)}</span>
+    </div>`).join('');
+
+  return `
+    <div class="chart">${bars}</div>
+    <div class="chart-legend">${legend}</div>
+  `;
+}
+
+/* ---------- Heatmap ---------- */
+function buildHeatmap(byDay, color) {
+  const todayDate = new Date();
+  todayDate.setHours(0,0,0,0);
+  const todayStr = isoDate(todayDate);
+
+  const start = new Date(todayDate);
+  start.setDate(start.getDate() - 52 * 7);
+  const dowStart = (start.getDay() + 6) % 7;
+  start.setDate(start.getDate() - dowStart);
+
+  const dates = [];
+  const cursor = new Date(start);
+  while (cursor <= todayDate) {
+    dates.push(isoDate(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  while (dates.length % 7 !== 0) dates.push(null);
+
+  const values = dates.filter(Boolean).map(d => byDay[d] || 0);
+  const max = Math.max(1, ...values);
+
+  const weeks = [];
+  for (let i = 0; i < dates.length; i += 7) weeks.push(dates.slice(i, i + 7));
+
+  let cellsHtml = '';
+  weeks.forEach(week => {
+    week.forEach(dateStr => {
+      if (!dateStr) {
+        cellsHtml += `<div class="hm-cell hm-empty-slot"></div>`;
+        return;
+      }
+      const val = byDay[dateStr] || 0;
+      const level = val === 0 ? 0 : Math.max(1, Math.min(4, Math.ceil(val / max * 4)));
+      const [y,m,d] = dateStr.split('-');
+      const tip = `${parseInt(d)} ${MONTHS_FULL[parseInt(m)-1].toLowerCase()} ${y}: ${val} стр.`;
+      const isToday = dateStr === todayStr ? ' hm-today' : '';
+      cellsHtml += `<div class="hm-cell hm-l${level}${isToday}" style="--hm-color:${color}" title="${tip}"></div>`;
+    });
+  });
+
+  let lastMonth = -1;
+  const monthCells = weeks.map(week => {
+    const first = week.find(Boolean);
+    if (!first) return '';
+    const month = parseInt(first.split('-')[1]) - 1;
+    if (month !== lastMonth) { lastMonth = month; return MONTHS_SHORT[month]; }
+    return '';
+  });
+  const monthsHtml = monthCells.map(l => `<div class="hm-month">${l}</div>`).join('');
+
+  return `
+    <div class="heatmap-wrap">
+      <div class="heatmap-inner">
+        <div class="hm-months">${monthsHtml}</div>
+        <div class="hm-body">
+          <div class="hm-weekdays">
+            <div>Пн</div><div></div><div>Ср</div><div></div><div>Пт</div><div></div><div>Вс</div>
+          </div>
+          <div class="hm-grid">${cellsHtml}</div>
+        </div>
+        <div class="hm-legend">
+          <span>Меньше</span>
+          <div class="hm-cell hm-l0" style="--hm-color:${color}"></div>
+          <div class="hm-cell hm-l1" style="--hm-color:${color}"></div>
+          <div class="hm-cell hm-l2" style="--hm-color:${color}"></div>
+          <div class="hm-cell hm-l3" style="--hm-color:${color}"></div>
+          <div class="hm-cell hm-l4" style="--hm-color:${color}"></div>
+          <span>Больше</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- Быстрая панель ---------- */
+function renderQuickAdd() {
+  const el = document.getElementById('quickAdd');
+  if (books.length === 0) { el.innerHTML = ''; return; }
+
+  if (!quickAddBookId || !books.find(b => b.id === quickAddBookId)) {
+    quickAddBookId = books[0].id;
+  }
+
+  el.innerHTML = `
+    <div class="quick-add">
+      <div class="quick-add-title">⚡ Быстрое добавление</div>
+      <div class="quick-add-row">
+        <label>Книга
+          <select id="qaBook">
+            ${books.map(b => `
+              <option value="${b.id}"${b.id === quickAddBookId ? ' selected' : ''}>
+                ${escapeHtml(b.title)} — ${b.read || 0}/${b.totalPages}
+              </option>`).join('')}
+          </select>
+        </label>
+        <label>Страниц
+          <input type="number" id="qaPages" min="1" placeholder="20">
+        </label>
+        <label>Дата
+          <input type="date" id="qaDate" value="${today()}">
+        </label>
+        <button class="btn" id="qaAdd">+ Добавить</button>
+      </div>
+      <div class="quick-add-feedback" id="qaFeedback"></div>
+    </div>
+  `;
+
+  const select = document.getElementById('qaBook');
+  const pagesInput = document.getElementById('qaPages');
+  const addBtn = document.getElementById('qaAdd');
+
+  select.addEventListener('change', e => {
+    quickAddBookId = e.target.value;
+  });
+
+  const submit = () => {
+    const bookId = select.value;
+    const pages = parseInt(pagesInput.value);
+    const date = document.getElementById('qaDate').value || today();
+    if (!pages || pages <= 0) { pagesInput.focus(); return; }
+
+    const book = books.find(b => b.id === bookId);
+    if (!book) return;
+
+    book.log = book.log || [];
+    book.log.push({ id: uid(), date, pages });
+    book.read = (book.read || 0) + pages;
+    if (book.read >= book.totalPages && !book.endDate) {
+      book.endDate = date;
+    }
+    save();
+
+    const fb = document.getElementById('qaFeedback');
+    fb.textContent = `✓ +${pages} стр. → «${book.title}» (${book.read}/${book.totalPages})`;
+    fb.classList.add('show');
+    clearTimeout(fb._t);
+    fb._t = setTimeout(() => fb.classList.remove('show'), 2500);
+
+    pagesInput.value = '';
+    pagesInput.focus();
+
+    renderSummary();
+    renderHeatmap();
+    renderBooks();
+    renderGlobalChart();
+    updateQuickAddOptionLabels();
+  };
+
+  addBtn.addEventListener('click', submit);
+  pagesInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); submit(); }
+  });
+}
+
+function updateQuickAddOptionLabels() {
+  const select = document.getElementById('qaBook');
+  if (!select) return;
+  for (const opt of select.options) {
+    const b = books.find(b => b.id === opt.value);
+    if (b) opt.textContent = `${b.title} — ${b.read || 0}/${b.totalPages}`;
+  }
+}
+
+/* ---------- Рендер ---------- */
+function renderAll() {
+  renderQuickAdd();
+  renderSummary();
+  renderHeatmap();
+  renderBooks();
+  renderGlobalChart();
+}
+
+function renderSummary() {
+  const el = document.getElementById('summary');
+  if (books.length === 0) { el.innerHTML = ''; return; }
+
+  const totalBooks = books.length;
+  const finished = books.filter(b => (b.read||0) >= b.totalPages).length;
+  const totalRead = books.reduce((s,b) => s + (b.read||0), 0);
+
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 6);
+  const weekStr = isoDate(weekAgo);
+  let pagesWeek = 0;
+  books.forEach(b => (b.log||[]).forEach(l => { if (l.date >= weekStr) pagesWeek += l.pages; }));
+
+  const allDays = new Set();
+  books.forEach(b => (b.log||[]).forEach(l => allDays.add(l.date)));
+  let streak = 0;
+  const cur = new Date(); cur.setHours(0,0,0,0);
+  if (!allDays.has(isoDate(cur))) cur.setDate(cur.getDate() - 1);
+  while (allDays.has(isoDate(cur))) {
+    streak++;
+    cur.setDate(cur.getDate() - 1);
+  }
+
+  el.innerHTML = `
+    <h2>Общая статистика</h2>
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="stat-value">${totalBooks}</div>
+        <div class="stat-label">Книг</div>
+      </div>
+      <div class="summary-card">
+        <div class="stat-value">${finished}</div>
+        <div class="stat-label">Завершено</div>
+      </div>
+      <div class="summary-card">
+        <div class="stat-value">${totalRead}</div>
+        <div class="stat-label">Прочитано страниц</div>
+      </div>
+      <div class="summary-card">
+        <div class="stat-value">${pagesWeek}</div>
+        <div class="stat-label">Страниц за 7 дней</div>
+      </div>
+      <div class="summary-card">
+        <div class="stat-value">${streak}${streak > 0 ? ' 🔥' : ''}</div>
+        <div class="stat-label">Дней подряд</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderHeatmap() {
+  const el = document.getElementById('heatmap');
+  if (books.length === 0) { el.innerHTML = ''; return; }
+
+  const source = heatmapMode === 'all'
+    ? books
+    : books.filter(b => b.id === heatmapMode);
+
+  if (source.length === 0) { el.innerHTML = ''; return; }
+
+  const byDay = {};
+  source.forEach(b => (b.log || []).forEach(l => {
+    byDay[l.date] = (byDay[l.date] || 0) + l.pages;
+  }));
+
+  // Цвет: для «Все книги» — дефолтный; для конкретной книги — её цвет
+  const color = heatmapMode === 'all'
+    ? DEFAULT_HEATMAP_COLOR
+    : (source[0].color || DEFAULT_HEATMAP_COLOR);
+
+  const selector = `
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+      <h2 style="margin:0;">Активность за год</h2>
+      <select id="heatmapSelect" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);font-family:inherit;font-size:13px;width:auto;">
+        <option value="all"${heatmapMode === 'all' ? ' selected' : ''}>Все книги</option>
+        ${books.map(b => `<option value="${b.id}"${heatmapMode === b.id ? ' selected' : ''}>${escapeHtml(b.title)}</option>`).join('')}
+      </select>
+    </div>
+  `;
+
+  el.innerHTML = `<div style="margin-top:24px;">${selector}${buildHeatmap(byDay, color)}</div>`;
+
+  document.getElementById('heatmapSelect').addEventListener('change', e => {
+    heatmapMode = e.target.value;
+    renderHeatmap();
+  });
+}
+
+function renderGlobalChart() {
+  const el = document.getElementById('globalChart');
+  if (books.length === 0) { el.innerHTML = ''; return; }
+
+  const hasAny = books.some(b => (b.log || []).length > 0);
+  if (!hasAny) { el.innerHTML = ''; return; }
+
+  el.innerHTML = `
+    <h2>Активность за 30 дней</h2>
+    <div class="summary-card" style="padding:16px 12px 4px;">
+      ${buildStackedChart(books, 30)}
+    </div>
+  `;
+}
+
+function renderBooks() {
+  const container = document.getElementById('books');
+  if (books.length === 0) {
+    container.innerHTML = '<div class="empty">Пока нет книг. Добавьте первую!</div>';
+    return;
+  }
+
+  container.innerHTML = books.map(book => {
+    // ---------- Форма редактирования книги ----------
+    if (editingBookId === book.id) {
+      return `
+        <div class="book" style="border-left-color:${book.color}">
+          <h3>✎ Редактирование книги</h3>
+          <div class="book-edit-grid">
+            <label>Название
+              <input type="text" id="edit-book-title" value="${escapeHtml(book.title)}"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditBook('${book.id}');}if(event.key==='Escape'){event.preventDefault();cancelEditBook();}">
+            </label>
+            <label>Всего страниц
+              <input type="number" id="edit-book-total" min="1" value="${book.totalPages}"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditBook('${book.id}');}if(event.key==='Escape'){event.preventDefault();cancelEditBook();}">
+            </label>
+            <label>Дата начала
+              <input type="date" id="edit-book-start" value="${book.startDate}"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditBook('${book.id}');}if(event.key==='Escape'){event.preventDefault();cancelEditBook();}">
+            </label>
+            <label>Цвет
+              <input type="color" id="edit-book-color" value="${book.color}"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditBook('${book.id}');}if(event.key==='Escape'){event.preventDefault();cancelEditBook();}">
+            </label>
+          </div>
+          <div class="book-edit-actions">
+            <button class="btn" onclick="saveEditBook('${book.id}')">Сохранить</button>
+            <button class="btn secondary" onclick="cancelEditBook()">Отмена (Esc)</button>
+            <span style="color:var(--text-dim);font-size:12px;align-self:center;margin-left:6px;">
+              Прочитано сейчас: ${book.read || 0} стр.
+            </span>
+          </div>
+        </div>
+      `;
+    }
+
+    // ---------- Обычная карточка книги ----------
+    const read = book.read || 0;
+    const percent = Math.min(100, Math.round(read / book.totalPages * 100));
+    const finished = read >= book.totalPages;
+    const logOpen = openLogs.has(book.id);
+    const statsOpen = openStats.has(book.id);
+    const logs = (book.log || []).slice().reverse();
+    const st = bookStats(book);
+
+    const logItems = logs.length === 0
+      ? '<div class="log-item"><span style="padding-left:6px;">Нет записей</span></div>'
+      : logs.map(l => {
+          if (editingLogId === l.id) {
+            return `
+              <div class="log-item editing">
+                <div class="log-edit-form">
+                  <input type="date" id="edit-date-${l.id}" value="${l.date}"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditLog('${book.id}','${l.id}');}if(event.key==='Escape'){event.preventDefault();cancelEditLog();}">
+                  <input type="number" id="edit-pages-${l.id}" min="1" value="${l.pages}"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();saveEditLog('${book.id}','${l.id}');}if(event.key==='Escape'){event.preventDefault();cancelEditLog();}">
+                  <span style="color:var(--text-dim);font-size:12px;">стр.</span>
+                  <button class="btn small" onclick="saveEditLog('${book.id}','${l.id}')" title="Сохранить">✓</button>
+                  <button class="btn small secondary" onclick="cancelEditLog()" title="Отмена (Esc)">✕</button>
+                </div>
+              </div>`;
+          }
+          return `
+            <div class="log-item">
+              <span class="log-date">${formatDate(l.date)}</span>
+              <span class="log-pages">${l.pages} стр.</span>
+              <span class="log-actions">
+                <button class="log-btn" onclick="startEditLog('${l.id}')" title="Изменить">✎</button>
+                <button class="log-btn danger" onclick="deleteLog('${book.id}','${l.id}')" title="Удалить">🗑</button>
+              </span>
+            </div>`;
+        }).join('');
+
+    return `
+      <div class="book" style="border-left-color:${book.color}">
+        <div class="book-header">
+          <div>
+            <div class="book-title">
+              ${escapeHtml(book.title)}
+              ${finished ? '<span class="finished-badge">Завершена</span>' : ''}
+            </div>
+            <div class="book-meta">
+              ${formatDate(book.startDate)} → ${book.endDate ? formatDate(book.endDate) : '—'}
+            </div>
+          </div>
+          <div class="book-actions">
+            <button class="btn small secondary" onclick="startEditBook('${book.id}')" title="Редактировать книгу">✎</button>
+            <button class="btn small secondary" onclick="toggleStats('${book.id}')">
+              ${statsOpen ? 'Скрыть статистику' : '📊 Статистика'}
+            </button>
+            <button class="btn small secondary" onclick="toggleLog('${book.id}')">
+              ${logOpen ? 'Скрыть историю' : 'История'}
+            </button>
+            <button class="btn small danger" onclick="removeBook('${book.id}')">✕</button>
+          </div>
+        </div>
+
+        <div class="progress-wrap">
+          <div class="progress-bar"
+               style="width:${percent}%; background:${book.color}"></div>
+        </div>
+        <div class="progress-info">
+          <span>${read} / ${book.totalPages} стр.</span>
+          <span>${percent}%</span>
+        </div>
+
+        <div class="add-pages">
+          <input type="number" id="pages-${book.id}" min="1" placeholder="Стр.">
+          <input type="date" id="date-${book.id}" value="${today()}">
+          <button class="btn small" onclick="addPages('${book.id}')">+ Добавить</button>
+        </div>
+
+        <div class="collapsible ${logOpen ? 'open' : ''}">
+          <div class="log">${logItems}</div>
+        </div>
+
+        <div class="collapsible ${statsOpen ? 'open' : ''}">
+          <div class="stats-row">
+            <div class="stat">
+              <div class="stat-value">${st.daysRead}</div>
+              <div class="stat-label">Дней чтения</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${st.avgPerReadingDay.toFixed(1)}</div>
+              <div class="stat-label">Стр. в день чтения</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${st.avgPerCalendarDay.toFixed(1)}</div>
+              <div class="stat-label">Стр. в среднем/день</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${st.bestDay ? formatDate(st.bestDay).slice(0,5) : '—'}</div>
+              <div class="stat-label">Лучший день (${st.bestPages})</div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">${st.remaining > 0 && st.forecastDate ? formatDate(st.forecastDate).slice(0,5) : (finished ? '✓' : '—')}</div>
+              <div class="stat-label">Прогноз финиша</div>
+            </div>
+          </div>
+          <h3 style="margin-top:14px">Последние 30 дней</h3>
+          ${buildChart(st.byDay, book.color, 30)}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- Обработчики книг ---------- */
+document.getElementById('addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const title = document.getElementById('title').value.trim();
+  const totalPages = parseInt(document.getElementById('totalPages').value);
+  const startDate = document.getElementById('startDate').value;
+  const color = document.getElementById('color').value;
+
+  const newBook = {
+    id: uid(),
+    title, totalPages, startDate, color,
+    endDate: null,
+    read: 0,
+    log: []
+  };
+  books.push(newBook);
+  quickAddBookId = newBook.id;
+  save();
+  e.target.reset();
+  document.getElementById('color').value = '#0071e3';
+  document.getElementById('startDate').value = today();
+  renderAll();
+  showToast(`Книга «${title}» добавлена`, 'success');
+});
+
+function addPages(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  const pagesInput = document.getElementById(`pages-${id}`);
+  const dateInput = document.getElementById(`date-${id}`);
+  const pages = parseInt(pagesInput.value);
+  const date = dateInput.value || today();
+
+  if (!pages || pages <= 0) return;
+
+  book.log = book.log || [];
+  book.log.push({ id: uid(), date, pages });
+  book.read = (book.read || 0) + pages;
+
+  if (book.read >= book.totalPages && !book.endDate) {
+    book.endDate = date;
+  }
+  save();
+  renderSummary();
+  renderHeatmap();
+  renderBooks();
+  renderGlobalChart();
+  updateQuickAddOptionLabels();
+}
+
+function removeBook(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+  if (!confirm(`Удалить книгу «${book.title}»?`)) return;
+  books = books.filter(b => b.id !== id);
+  if (heatmapMode === id) heatmapMode = 'all';
+  if (quickAddBookId === id) quickAddBookId = books[0] ? books[0].id : null;
+  if (editingBookId === id) editingBookId = null;
+  save();
+  renderAll();
+  showToast('Книга удалена');
+}
+
+function toggleLog(id) {
+  if (openLogs.has(id)) openLogs.delete(id);
+  else openLogs.add(id);
+  renderBooks();
+}
+
+function toggleStats(id) {
+  if (openStats.has(id)) openStats.delete(id);
+  else openStats.add(id);
+  renderBooks();
+}
+
+/* ---------- Редактирование книги ---------- */
+function startEditBook(id) {
+  editingBookId = id;
+  editingLogId = null;
+  renderBooks();
+  setTimeout(() => {
+    const input = document.getElementById('edit-book-title');
+    if (input) { input.focus(); input.select(); }
+  }, 0);
+}
+
+function cancelEditBook() {
+  editingBookId = null;
+  renderBooks();
+}
+
+function saveEditBook(id) {
+  const book = books.find(b => b.id === id);
+  if (!book) return;
+
+  const titleInput = document.getElementById('edit-book-title');
+  const totalInput = document.getElementById('edit-book-total');
+  const startInput = document.getElementById('edit-book-start');
+  const colorInput = document.getElementById('edit-book-color');
+
+  const title = titleInput.value.trim();
+  const total = parseInt(totalInput.value);
+  const start = startInput.value;
+  const color = colorInput.value;
+
+  if (!title) { showToast('Название не может быть пустым', 'error'); titleInput.focus(); return; }
+  if (!total || total <= 0) { showToast('Страниц должно быть больше 0', 'error'); totalInput.focus(); return; }
+  if (!start) { showToast('Укажите дату начала', 'error'); startInput.focus(); return; }
+
+  const wasFinished = (book.read || 0) >= book.totalPages;
+  const willBeFinished = (book.read || 0) >= total;
+
+  book.title = title;
+  book.totalPages = total;
+  book.startDate = start;
+  book.color = color;
+
+  // Пересчёт даты окончания: если стало/осталось завершённым — по последней записи; иначе null
+  if (willBeFinished && (book.log || []).length > 0) {
+    const sorted = [...book.log].sort((a, b) => a.date.localeCompare(b.date));
+    book.endDate = sorted[sorted.length - 1].date;
+  } else {
+    book.endDate = null;
+  }
+
+  editingBookId = null;
+  save();
+  renderAll();
+  showToast('Книга обновлена', 'success');
+
+  if (!wasFinished && willBeFinished) {
+    showToast(`«${book.title}» — завершена! 🎉`, 'success');
+  }
+}
+
+/* ---------- Редактирование записей журнала ---------- */
+function startEditLog(logId) {
+  editingLogId = logId;
+  editingBookId = null;
+  renderBooks();
+  setTimeout(() => {
+    const input = document.getElementById(`edit-pages-${logId}`);
+    if (input) { input.focus(); input.select(); }
+  }, 0);
+}
+
+function cancelEditLog() {
+  editingLogId = null;
+  renderBooks();
+}
+
+function saveEditLog(bookId, logId) {
+  const book = books.find(b => b.id === bookId);
+  if (!book) return;
+  const entry = (book.log || []).find(l => l.id === logId);
+  if (!entry) return;
+
+  const dateInput = document.getElementById(`edit-date-${logId}`);
+  const pagesInput = document.getElementById(`edit-pages-${logId}`);
+  const date = dateInput ? dateInput.value : entry.date;
+  const pages = pagesInput ? parseInt(pagesInput.value) : entry.pages;
+
+  if (!date) { showToast('Укажите дату', 'error'); return; }
+  if (!pages || pages <= 0) { showToast('Страниц должно быть больше 0', 'error'); return; }
+
+  entry.date = date;
+  entry.pages = pages;
+  recalcBook(book);
+
+  editingLogId = null;
+  save();
+  renderSummary();
+  renderHeatmap();
+  renderBooks();
+  renderGlobalChart();
+  updateQuickAddOptionLabels();
+  showToast('Запись обновлена', 'success');
+}
+
+function deleteLog(bookId, logId) {
+  const book = books.find(b => b.id === bookId);
+  if (!book) return;
+  const entry = (book.log || []).find(l => l.id === logId);
+  if (!entry) return;
+  if (!confirm(`Удалить запись от ${formatDate(entry.date)} — ${entry.pages} стр.?`)) return;
+
+  book.log = book.log.filter(l => l.id !== logId);
+  recalcBook(book);
+
+  editingLogId = null;
+  save();
+  renderSummary();
+  renderHeatmap();
+  renderBooks();
+  renderGlobalChart();
+  updateQuickAddOptionLabels();
+  showToast('Запись удалена');
+}
+
+document.getElementById('clearAll').addEventListener('click', () => {
+  if (books.length === 0) return;
+  if (!confirm('Удалить все книги без возможности восстановления?\n\nСовет: сначала сделайте экспорт.')) return;
+  books = [];
+  quickAddBookId = null;
+  editingLogId = null;
+  editingBookId = null;
+  save();
+  renderAll();
+  showToast('Все книги удалены');
+});
+
+/* ---------- Старт ---------- */
+initTheme();
+document.getElementById('startDate').value = today();
+renderAll();
+</script>
+</body>
+</html>
